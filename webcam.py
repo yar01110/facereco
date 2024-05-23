@@ -3,7 +3,8 @@ from threading import Thread
 import requests 
 import json 
 import base64
-
+from SYSTEM import System
+s=System()
 
   
 class Stream:
@@ -31,8 +32,8 @@ class Stream:
         while(True):
             try:
 
-                self.current_frame = self.video_capture.read()[1]
-
+                self.current_frame = s(self.video_capture.read()[1])
+                
               
                 encodedFrame =cv2.imencode('.jpg',self.current_frame)[1].tobytes()
 
