@@ -36,7 +36,7 @@ class DataStream(metaclass=Singleton):
 
                 cls.curr_data[trackId]=cls.data_buffer[trackId]
 
-                cls.curr_data[trackId].personImg=xyxy
+                cls.curr_data[trackId].personxyxy=xyxy
                 
                 cls.curr_data[trackId].personImg=cls.bbtoimg(xyxy,img)
 
@@ -125,7 +125,7 @@ class DataStream(metaclass=Singleton):
         if identity==0:
             return None
     
-        for index,ident in cls.curr_state["stranger"],identity:
+        for index,ident in zip(cls.curr_state["stranger"],identity):
             
             cls.data_buffer[index].identification,cls.data_buffer[index].state=ident,"recognated"
             
@@ -155,21 +155,15 @@ class DataStream(metaclass=Singleton):
         return img[y1:y2, x1:x2]
     
     def draw_bounding_boxes(cls,bboxes, names):
-    
-        
-        output_image = cls.img.copy()
+       
+        cv2.putText(cls.img, str(len(cls.curr_data)), (cls.img.shape[1] - cv2.getTextSize(str(len(cls.curr_data)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0][0] - 5, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         for bbox, name in zip(bboxes, names):
+            x1, y1, x2, y2 = map(int, bbox)  # Ensure coordinates are integers
+            cv2.rectangle(cls.img, (x1, y1), (x2, y2), (255, 255, 0), 2)
+            cv2.putText(cls.img, name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-            x1, y1, x2, y2 = bbox
-            x1, y1, x2, y2=int(x1), int(y1), int(x2), int(y2)
-
-            cv2.rectangle(output_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-
-            cv2.putText(output_image, name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-        return output_image
+        return cls.img
     
     def get_names_and_boxes(cls):
         boxes=[]
@@ -181,14 +175,18 @@ class DataStream(metaclass=Singleton):
             elif data.state=="spoofer":
                 names.append("spoofer")
             else :
-                names.apend("name :" ,data.identification.get("name") ,"role: ",data.identification.get("role"))
+                if isinstance(data.identification,str):
+                    names.append("stranger")
+                    continue
+                names.append(f"name: {data.identification.get('name')} role: {data.identification.get('role')}")
+
+                
         
         return boxes,names
     
     
     def __call__(cls):
 
-        print(cls.curr_data)
         boxes ,names=cls.get_names_and_boxes()
-        cls.draw_bounding_boxes(boxes,names)
-        return cls.img
+        img=cls.draw_bounding_boxes(boxes,names)
+        return img
