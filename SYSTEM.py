@@ -9,7 +9,7 @@ from image_preprocessing import TransposeResizeNormalizeBatchingWithDifferentDim
 import numpy as np
 
 class System:
-    def __init__(self,video_path):
+    def __init__(self):
         self.curr_img=None
         self.prev_img=None
         self.datast=DataStream()a
@@ -23,7 +23,7 @@ class System:
         
         self.client=connectionToDb()  
         
-        self.cap = cv2.VideoCapture(video_path)
+        
           
     def detect_changes(self,prev_frame, frame):
         
@@ -41,7 +41,7 @@ class System:
         
         return non_zero_pixels
     
-    def interpret_result(self,img):
+    def __call__(self,img):
 
         silence_counter=0
         
@@ -130,26 +130,3 @@ class System:
         self.datast.clear_curr_data()
         
         return img
-    
-    def __call__(self):
-        
-        while True:
-    
-            ret, frame = self.cap.read()
-            
-            output_frame=self.interpret_result(frame)
-        
-            cv2.imshow('Frame', output_frame)
-        
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-        
-                break
-
-
-        self.cap.release()
-        
-        cv2.destroyAllWindows()
-
-s=System(0)
-
-s()
