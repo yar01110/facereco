@@ -12,7 +12,7 @@ class System:
     def __init__(self):
         self.curr_img=None
         self.prev_img=None
-        self.datast=DataStream()a
+        self.datast=DataStream()
         self.person_detection=YoloDetection("./yolov8m.onnx",tracking=True)
         self.face_detection=YoloDetection("./yolov8m-face.onnx")
         self.facelive=FaceLivenes()
